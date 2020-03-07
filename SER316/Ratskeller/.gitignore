@@ -1,0 +1,85 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+### Eclipse ###
+
+### Eclipse Patch ###
+# Eclipse Core		
+.project
+
+#Neo4j
+Neo4jdb/
+
+BUS_SCHEDULER_MOCK_DATA-BUS.csv
+RouteNodes.json
+certificates/
+index.html
+src/main/resources/mock_data/
+.html
+.metadata/
+.settings/
+src/main/java/memoranda/.gitignore
+src/main/java/memoranda/.settings/
+
+### Intellij+iml ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# JDT-specific (Eclipse Java Development Tools)		
+.classpath
+
+### Gradle ###
+.gradle
+# IntelliJ
+.idea/**/gradle.xml
+.idea/**/libraries
+
+### Intellij+iml Patch ###
+# Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
+*.iml
+modules.xml
+.idea/misc.xml
+*.ipr
+
+/build/
+
+# Mac DS file
+.DS_Store
+
+# fatJar
+mtmille5_memoranda.jar
+akclifto_memoranda.jar
+bgiffen_memorando.jar
+
+# web links
+Report_a_Bug.md
+Online_User's_Guide.md
+Bus_Scheduler_Website.md
+
+/bin/
+
+/class/
+
