@@ -1,0 +1,45 @@
+[
+    {
+        "method": "toJsonFile",
+        "params":["fileName"],
+        "returns": true
+    },
+    {
+        "method": "initLibraryFromJsonFile",
+        "params":["fileName"],
+        "returns": true
+    },
+    {   // addJsonTrack(StringOfAnAlbumName, JsonOfATrack, JsonOfSearchedAlbum) --> void
+        "method": "addJsonTrack",
+        "params":["AlbumName", { }, { }]
+    },
+    {   // addJsonAlbum(JsonOfAnAlbum) --> void
+        "method": "addJsonAlbum",
+        "params":[{ }]
+    },
+    {   // removeTrack(StringOfAnAlbum, StringOfATrack) --> bool
+        "method": "removeTrack",
+        "params":["AlbumName", "TrackName"],
+        "returns": true
+    },
+    {   // remove(string) --> bool
+        "method": "removeAlbum",
+        "params":["AlbumName"],
+        "returns": true
+    },    
+    {   // getJsonTrack(StringOfAnAlbum, StringOfATrack) --> jsonOfATrack
+        "method": "getJsonTrack",
+        "params":["AlbumName", "TrackName"],
+        "returns":{ }
+    },
+    {   // getJsonAlbum(string) --> jsonOfAnAlbum
+        "method": "getJsonAlbum",
+        "params":["AlbumName"],
+        "returns":{ }
+    },
+    {   // getJsonAlbums() --> json array of strings of Album names
+        "method": "getJsonAlbums",
+        "params":[],
+        "returns": [ ]
+    }
+]

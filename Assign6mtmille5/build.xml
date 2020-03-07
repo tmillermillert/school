@@ -1,0 +1,102 @@
+<project name="Ser321 Assign6 Json-RPC" default="targets" basedir=".">
+
+   <!-- set global properties for this build -->
+   <property name="src" value="src" />
+   <property name="build" value="classes" />
+   <property name="lib" value="lib" />
+   <property name="host" value="localhost" />
+   <property name="port" value="1099" />
+   <property name="userId" value="mtmille5" />
+   <property name="lastfmkey" value="enter lastfm key here" />
+   <property name="javafxhome" value="javafx-sdk-13.0.1/"/>
+   <property name="javafx-lib-home" value="${javafxhome}lib"/>
+
+   <path id="compile.classpath">
+      <pathelement location="${build}"/>
+      <fileset dir="${lib}">
+         <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${basedir}/${javafx-lib-home}">
+         <include name="javafx.graphics.jar"/>
+         <include name="javafx.base.jar"/>
+         <include name="javafx.media.jar"/>
+         <include name="javafx.swing.jar"/>
+         <include name="javafx.controls.jar"/>
+         <include name="javafx.web.jar"/>
+         <include name="javafx.swt.jar"/>
+         <include name="javafx.fxml.jar"/>
+         <include name="javafx.controls.jar"/>
+      </fileset>
+   </path>
+
+   <target name="checkos">
+	<condition property="os" value="windows">
+		<os family="windows" />
+	</condition>
+	<condition property="os" value="unix">
+		<os family="unix" />
+	</condition>
+	<condition property="os" value="mac">
+		<os family="mac" />
+	</condition>
+   </target>
+
+   <target name="targets" depends="checkos">
+      <echo message="targets are clean, prepare, compile, server, client"/>
+      <echo message="java home is: ${java.home}"/>
+      <echo message="os family is: ${os}"/>
+      <echo>
+         start server with: ant server -Dport=2222
+      </echo>
+      <echo>
+         start client with: ant client -Dhost=localhost -Dport=2222 -Dlastfmkey=key
+      </echo>
+   </target>
+
+   <target name="prepare">
+      <!-- Create the time stamp -->
+      <tstamp/>
+      <!-- Create the build directory structure used by compile -->
+      <echo message="home defined as: ${home}" />
+      <mkdir dir="${build}" />
+   </target>
+
+   <target name="compile" depends="prepare"
+           description="Compile Java sources">
+      <javac includeantruntime="false"
+             destdir="${build}">
+         <src path="${src}/java/client"/>
+         <src path="${src}/java/server"/>
+         <classpath refid="compile.classpath"/>
+      </javac>
+   </target>
+
+   <target name="java.client" depends="compile"
+           description="Start client">
+         <echo message="user.dir is: ${user.dir}"/>
+         <echo message="command line client: java -cp classes clientApp ${host} ${port} ${lastfmkey}" />
+         <java classname="ser321.assign6.mtmille5.client.clientApp" fork="yes">
+           <classpath refid="compile.classpath"/>
+           <arg value="${host}"/> 
+           <arg value="${port}"/>
+           <arg value="${lastfmkey}"/>
+           <arg value="${userId}"/>
+         </java>
+   </target>
+
+   <target name="server" depends="compile"
+           description="start server">
+         <echo message="user.dir is: ${user.dir}"/>
+         <echo message="command line Server: java -cp classes MusicLibraryTCPJsonServer ${port}" />
+         <java classname="ser321.assign6.mtmille5.server.MusicLibraryTCPJsonRPCServer" fork="yes">
+           <arg value="${port}"/> 
+           <classpath refid="compile.classpath"/>
+         </java>
+   </target>
+
+   <target name="clean">
+     <!-- Delete the ${build} directory tree -->
+     <delete dir="${build}" />
+   </target>
+
+</project>

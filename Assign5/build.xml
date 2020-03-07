@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<project name="Ser321 Assign5 C++ Music Library, build file."
+         default="targets" basedir="."
+         xmlns="antlib:org.apache.tools.ant">
+   <taskdef resource="cpptasks.tasks"/>
+   <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+   <property name="lib" value="./lib" />
+   <property name="src.cpp.dir" value="./src"/>
+   <property name="obj.dir" value="obj"/>
+   <property name="dist.dir" value="bin"/>
+   <property name="lastfmkey" value="mylastfmkey"/>
+   <property environment="env"/>
+   <property name="userId" value="${env.USER}"/>
+   <property name="host" value="127.0.0.1"/>
+   <property name="port" value="8080"/>
+   <property name="json.file.name" value="spec.json"/>
+   <!--Set the ostype property: <property name="ostype" value="${env.OSTYPE}"/>-->
+   <condition property="ostype" value="${env.OSTYPE}">
+      <isset property="env.OSTYPE" />
+   </condition>
+   <condition property="ostype" value="env.OSTYPE_inaccessable">
+      <not>
+         <isset property="env.OSTYPE" />
+      </not>
+   </condition>
+
+   <!--Set the dyldpath property <var name="dyldpath" value="${env.DYLD_FALLBACK_LIBRARY_PATH}"/>-->
+   <condition property="dyldpath" value="${env.DYLD_FALLBACK_PATH}">
+      <isset property="env.DYLD_FALLBACK_PATH" />
+   </condition>
+   <condition property="dyldpath" value="env.DYLD_FALLBACK_PATH_inaccessible">
+      <not>
+         <isset property="env.DYLD_FALLBACK_PATH" />
+      </not>
+   </condition>
+
+
+   <target name="targets">
+      <echo message="Targets are targets, clean, prepare, build.cpp.server, build.cpp.client, server, and client"/>
+      <echo message="base directory is: ${basedir} and ostype is ${ostype}"/>
+      <echo message="execute cpp server with: ./bin/MusicLibraryRPCServer ${port}"/>
+      <echo message="execute cpp client with: ./bin/MusicBrowserRPCClient http://${host} ${port} ${userId} ${lastfmkey}"/>
+   </target>
+
+   <path id="compile.classpath">
+      <pathelement location="${classes.dir}"/>
+      <fileset dir="${basedir}/lib">
+         <include name="json.jar"/>
+      </fileset>
+   </path>
+
+
+   <target name="clean">
+     <delete dir="${obj.dir}" failonerror="false"/>
+     <delete dir="${dist.dir}" failonerror="false"/>
+     <delete file="${src.cpp.dir}/client/musicbrowserstub.h"
+             failonerror="false"/>
+     <delete file="${src.cpp.dir}/server/musiclibraryserverstub.h"
+             failonerror="false"/>
+
+   </target>
+
+   <target name="prepare">
+      <!-- Create the time stamp -->
+      <tstamp/>
+      <!-- Create the build directory structure used by compile -->
+      <echo message="home defined as: ${env.HOME}" />
+      <mkdir dir="${dist.dir}" />
+      <mkdir dir="${obj.dir}/client" />
+      <mkdir dir="${obj.dir}/server" />
+      <if>
+         <isset property="env.USERNAME"/>
+         <then>
+           <echo message="detected username is: ${env.USERNAME}"/>
+          </then>
+      <elseif>
+         <isset property="env.USER"/>
+         <then>
+            <echo message="detected user is: ${env.USER}"/>
+          </then>
+      </elseif>
+
+      </if>
+      <echo message="host name is: ${os.name}"/>
+      <echo message="host arch is: ${os.arch}"/>
+      <echo message="host version is: ${os.version}"/>
+      <echo message="base directory is: ${basedir}"/>
+
+      <!-- Platform identification -->
+      <condition property="build.host.islinux">
+         <and>
+            <os family="unix" />
+            <not>
+               <contains string="${os.name}" substring="mac"
+                      casesensitive="false" />
+            </not>
+         </and>
+      </condition>
+      <condition property="build.host.platform" value="linux">
+         <isset property="build.host.islinux" />
+      </condition>
+
+      <condition property="build.host.ismac">
+         <and>
+            <os family="unix" />
+            <contains string="${os.name}" substring="mac" casesensitive="false"/>
+         </and>
+      </condition>
+      <condition property="build.host.platform" value="mac">
+         <isset property="build.host.ismac" />
+      </condition>
+
+      <fail unless="build.host.platform"
+            message="Building on ${os.name} is not supported" />
+      <echo message="build.host.platform is: ${build.host.platform}"/>
+      <if>
+         <isset property="build.host.ismac"/>
+         <then>
+            <echo message="detected a mac host"/>
+            <property name="cxxflag" value="-std=c++14"/>
+            <property name="includepath" value="/opt/local/include:/usr/local/include"/>
+            <property name="client.lib.path" value="/opt/local/lib"/>
+            <property name="client.lib.list" value="c++,jsoncpp,jsonrpccpp-client,jsonrpccpp-common,microhttpd,stdc++"/>
+            <property name="server.lib.path" value="/opt/local/lib"/>
+            <property name="server.lib.list" value="c++,jsoncpp,jsonrpccpp-server,jsonrpccpp-common,microhttpd"/>
+         </then>
+      <elseif>
+         <isset property="build.host.islinux"/>
+         <then>
+            <echo message="detected a linux host"/>
+            <property name="cxxflag" value="-std=c++14"/>
+            <property name="includepath" value="/usr/local/include:/usr/include/jsoncpp"/>
+            <property name="client.lib.path" value="/usr/local/lib"/>
+            <property name="client.lib.list" value="jsoncpp,jsonrpccpp-client,jsonrpccpp-common,microhttpd,stdc++"/>
+            <property name="server.lib.path" value="/usr/local/lib"/>
+            <property name="server.lib.list" value="jsoncpp,jsonrpccpp-server,jsonrpccpp-common,microhttpd,stdc++"/>
+         </then>
+      </elseif>
+      <else>
+         <echo message="failed to detect a host I know how to build on"/>
+      </else>
+      </if>
+   </target>
+
+
+   <target name="build.cpp.client" depends="prepare">
+      <exec dir="${basedir}" executable="jsonrpcstub">
+         <arg line="${json.file.name} --cpp-client=musicbrowserstub"/>
+      </exec>
+      <copy file="musicbrowserstub.h"
+            tofile="${src.cpp.dir}/client/musicbrowserstub.h"/>
+      <delete file="musicbrowserstub.h"/>
+
+      <cc outtype="executable" subsystem="console"
+         outfile="${dist.dir}/MusicBrowserRPCClient"
+         objdir="${obj.dir}/client">
+	      <compilerarg value="${cxxflag}"/>
+         <includepath>
+            <pathelement path="${includepath}"/>
+         </includepath>
+
+         <includepath>
+            <dirset dir="./src" includes="client,server"/>
+         </includepath>
+          <libset dir="/usr/lib" libs="stdc++,fltk,fltk_images,curl,jsoncpp,pthread"/>
+          <libset dir="/usr/local/lib" libs="curlpp"/>
+          <libset dir="${client.lib.path}" libs="${client.lib.list}"/>
+          <fileset dir="${src.cpp.dir}/client/" includes="MediaClientGui.cpp, MusicBrowser.cpp"/>
+          <fileset dir="${src.cpp.dir}/server/" includes="Album.cpp, Track.cpp, MusicLibrary.cpp"/>
+      </cc>
+   </target>
+   
+   <target name="build.cpp.server" depends="prepare">
+      <exec dir="${basedir}" executable="jsonrpcstub">
+         <arg line="${json.file.name} --cpp-server=musiclibraryserverstub"/>
+      </exec>
+      <copy file="musiclibraryserverstub.h"
+            tofile="${src.cpp.dir}/server/musiclibraryserverstub.h"/>
+      <delete file="musiclibraryserverstub.h"/>
+
+      <cc outtype="executable" subsystem="console"
+         outfile="${dist.dir}/MusicLibraryRPCServer"
+         objdir="${obj.dir}/server">
+	      <compilerarg value="${cxxflag}"/>
+         <includepath>
+            <pathelement path="${includepath}"/>
+         </includepath>
+
+         <includepath>
+            <dirset dir="./src" includes="client,server"/>
+         </includepath>
+          <libset dir="/usr/lib" libs="stdc++,fltk,fltk_images,curl,jsoncpp,pthread"/>
+          <libset dir="/usr/local/lib" libs="curlpp"/>
+          <libset dir="${server.lib.path}" libs="${server.lib.list}"/>
+          <fileset dir="${src.cpp.dir}/server/" includes="Album.cpp, Track.cpp, MusicLibrary.cpp, MusicLibraryServer.cpp"/>
+      </cc>
+   </target>
+
+   <target name="client" depends="build.cpp.client">
+     <echo message="./bin/MusicBrowserRPCClient ${host} ${port} ${userId} ${lastfmkey}"/>
+     <exec executable="./bin/MusicBrowserRPCClient">
+       <arg line= "${host} ${port} ${userId} ${lastfmkey}"/>
+     </exec>
+   </target>
+
+   <target name="server" depends="build.cpp.server">
+     <echo message="./bin/MusicLibraryRPCServer ${port}"/>
+     <exec executable="./bin/MusicLibraryRPCServer">
+       <arg line= "${port}"/>
+     </exec>
+   </target>
+</project>
